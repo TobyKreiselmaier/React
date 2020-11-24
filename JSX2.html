@@ -6,9 +6,16 @@
     <title>Document</title>
 </head>
 <body>
-    <p>
-        <b>text</b>
-    </p>
-    <input type="text"/>
+    <div id="hello">
+        <p>Lorem, ipsum.</p>
+    </div>
+
+    //JSX
+    React.createElement(
+        "div", {id: "hello"},
+        React.createElement(
+            "p", null, "Lorem, ipsum."
+        )
+    );
 </body>
 </html>

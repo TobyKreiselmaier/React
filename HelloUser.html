@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Hello User</title>
+    <!-- CDN | Content Delivery Network links -->
     <!-- Creates React object e.g. line 17-23 -->
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <!-- Does the rendering lines 28-31 -->
@@ -12,26 +13,96 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body>
-    <div id="hello-example"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Ticker</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody id='root'></tbody>
+    </table>
+    <!--for is a reserved keyword in React / use htmlFor instead-->
+    <!--class is a reserved keyword in React / use className instead-->
     <script type="text/babel">
+    ethereum.autoRefreshOnNetworkChange = false;
+      React.createElement(
+        'label', {
+          for: 'name-field'
+        }
+      )
 
-        class HelloMessage extends React.Component {
-            render() {
-             return (
-              <h1>
-                 Hello {this.props.name}
-              </h1>
-    );
-  }
-}
-
-        ReactDOM.render(
-        <HelloMessage name="Toby" />,
-        document.getElementById('hello-example')
+/*even easier:*/
+const Coin = ({name, ticker, price}) => (
+      <tr>
+        <td>{name}</td>
+        <td>{ticker}</td>
+        <td>{price}</td>
+      </tr>
 );
+
+/*function Coin(props) {
+  return ( /*put markup in paranteses as JS would otherwise add ; which will not be good here 
+          <tr>
+            <td>{props.name}</td>
+            <td>{props.ticker}</td>
+            <td>{props.price}</td>
+          </tr>
+        );
+}*/
+
+
+/*    class Coin extends React.Component { /*classes really are constructor functions so they can be replaced by foo().
+      /*
+      constructor(props) {
+        super(props);
+      } this will be done automatically by JS
+      
+      render() {
+        return ( /*put markup in paranteses as JS would otherwise add ; which will not be good here 
+          <tr>
+            <td>{this.props.name}</td>
+            <td>{this.props.ticker}</td>
+            <td>{this.props.price}</td>
+          </tr>
+        );
+      }
+    }
+*/
+
+    class HelloMessage extends React.Component {
+        render() {
+          return (
+          <div>
+            <label htmlFor='name-field' className='mr-auto'>Name: </label>
+            <input type='text' id='name-field' />                  
+            Hello {this.props.name}
+          </div>
+          );
+        }
+    }
+
+    ReactDOM.render(
+      <>
+        <Coin name ='Bitcoin' ticker='BTC' price='$19000' />
+        <Coin name ='Ether' ticker='ETH' price='$600' />
+      </>,
+      document.getElementById('root')
+    );
+
+    React.createElement(
+      React.Fragment, 
+      null,
+      React.createElement(HelloMessage, { name: "Zsolt" }),
+      React.createElement(HelloMessage, { name: "Sarah"})
+    );
 
     </script>
     <!--
+      Using the <></> doesn't create a new DOM element that would otherwise mess up HTML structure (e.g. ul)
+      React fragments.
+
       Note: this page is a great way to try React but it's not suitable for production.
       It slowly compiles JSX with Babel in the browser and uses a large development build of React.
 

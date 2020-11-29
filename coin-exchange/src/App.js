@@ -12,7 +12,7 @@ function App() {
           Coin Exchange
         </h1>
       </header>
-      <table>
+      <table className='cointable'>
       <thead>
         <tr>
           <th>Name</th>
@@ -21,13 +21,15 @@ function App() {
         </tr>
       </thead>
       <tbody>
-        <Coin name ='Bitcoin' ticker='BTC' price='$19000' />
-        <Coin name ='Ether' ticker='ETH' price='$600' />
+        <Coin name ='Bitcoin' ticker='BTC' price={18000} />
+        <Coin name ='Ethereum' ticker='ETH' price={550} />
+        <Coin name ='Tether' ticker='USDT'  price={1.0}/>
+        <Coin name ='Ripple' ticker='XRP' price={0.6} />
       </tbody>
     </table>
 
     </div>
   );
 }
-
+ /*props are optional */
 export default App;

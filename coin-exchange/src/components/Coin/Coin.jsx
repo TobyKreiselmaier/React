@@ -1,62 +1,43 @@
-/* eslint-disable no-useless-constructor */
-import React, { Component } from 'react' //typed rcc
-import './Coin.css'; //create-react-app allows to do this.
-import propTypes from 'prop-types'; //allows checking of props' types
+import React, { Component } from 'react';
+import styled from 'styled-components';
+import propTypes from 'prop-types';
+
+const Td = styled.td`
+    border: 1px solid rgb(15, 10, 10);
+    width: 25vh;
+`;
+
+const Button = styled.button`
+    font-size: 1.0rem;
+    margin: 0.5rem 0 0.5rem 0;
+    background-color: #282c34;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 5px;
+`;
 
 export default class Coin extends Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        price: this.props.price
-      }
-      this.handleClick = this.handleClick.bind(this)//important to set for each event
+    handleClick = (event) => {
+      event.preventDefault();
+      this.props.handleRefresh(this.props.ticker);
     }
-/* THIS WOULD BE THE AUTOMATED CHANGING OF PRICES
-    componentDidMount() {
-      let callback = () => {
-        //set state to new random value
-        let randomPercentage = 0.995 + Math.random() * 0.01;
-        //don't do this; only allowed constructor:
-        //this.state.price = this.state.price * randomPercentage;
-        //instead do for functions:
-        this.setState( (oldState) => {
-          return {
-            price: oldState.price * randomPercentage
-          };
-        });
 
-        //or this for values, but could be issue with concurrence:
-        //this.setState({price: this.state.price * randomPercentage});
-
-      }
-      setInterval(callback, 1000);
-    }
-*/
-
-handleClick(event) {
-  // Prevent the default action of submitting this form
-  event.preventDefault();
-
-  let randomPercentage = 0.95 + Math.random() * 0.1;
-  this.setState( (oldState) => {
-    return {
-      price: oldState.price * randomPercentage
-    };
-  });
-
-}
     render() {
+        const coinBalance = this.props.showBalance ?
+                            <Td>{this.props.balance} {this.props.ticker}</Td> : null;
+
         return (
-            <tr className='coinrow'>
-              <td>{this.props.name}</td>
-              <td>{this.props.ticker}</td>
-              <td>${this.state.price}</td>
-              <td>
+            <tr>
+              <Td>{this.props.name}</Td>
+              <Td>{this.props.ticker}</Td>
+              <Td>${this.props.price}</Td>
+              {coinBalance}
+              <Td>
                 <form action='#' method='POST'>
-                  <button onClick={this.handleClick}>Refresh
-                  </button>
+                  <Button onClick={this.handleClick}>Refresh
+                  </Button>
                 </form>
-              </td>
+              </Td>
             </tr>
         );
       }

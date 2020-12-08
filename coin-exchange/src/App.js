@@ -1,37 +1,84 @@
 import React from 'react'
-import logo from './logo.svg'
-import './App.css';//style app here
-import Coin from './components/Coin/Coin';
+import ExchangeHeader from './components/ExchangeHeader/ExchangeHeader';
 import AccountBalance from './components/AccountBalance/AccountBalance';
+import CoinList from './components/CoinList/CoinList';
+import styled from 'styled-components';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} alt='React Logo' className='App-logo'></img>
-        <h1 className='App-title'>
-          Coin Exchange
-        </h1>
-      </header>
-      <AccountBalance amount={10000}/>
-      <table className='cointable'>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Ticker</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <Coin name ='Bitcoin' ticker='BTC' price={18966} />
-        <Coin name ='Ethereum' ticker='ETH' price={593} />
-        <Coin name ='Tether' ticker='USDT'  price={1.0}/>
-        <Coin name ='Ripple' ticker='XRP' price={0.62} />
-      </tbody>
-    </table>
+const Div = styled.div`
+    text-align: center;
+    background-color:#61DBFB;
+    color: rgb(15, 10, 10);
+`;
 
-    </div>
-  );
+class App extends React.Component {
+  state = {
+    balance: 10000,
+    showBalance: true, //added bool so condition can be passed on
+    coinData: [
+      {
+        name: 'Bitcoin',
+        ticker: 'BTC',
+        balance: 0.5,
+        price: 18966
+      },
+      {
+        name: 'Ethereum',
+        ticker: 'ETH',
+        balance: 32.0,
+        price: 593
+      },
+      {
+        name: 'Tether',
+        ticker: 'USDT',
+        balance: 0,
+        price: 1.0
+      },
+      {
+        name: 'Ripple',
+        ticker: 'XRP',
+        balance: 1000,
+        price: 0.62
+      },
+      {
+        name: 'Bitcoin Cash',
+        ticker: 'BCH',
+        balance: 0,
+        price: 239
+      }
+    ]
+  }
+
+  classProperty = 'value'
+
+  handleBalanceDisplay = () => {
+    this.setState({showBalance: !this.state.showBalance});//change bool
+  }
+
+  handleRefresh = (valueChangeTicker) => {
+    const newCoinData = this.state.coinData.map((values) => {
+      let newValues = {...values};
+      if (valueChangeTicker === values.ticker) {
+        let randomPercentage = 0.95 + Math.random() * 0.1;
+            newValues.price *= randomPercentage;
+      };
+      return newValues;
+    });
+    this.setState( {coinData: newCoinData} )//will trigger fresh rendering //balance remains untouched
+  }
+
+  render() {
+    return (
+      <Div className="App">
+        <ExchangeHeader/>
+        <AccountBalance amount={this.state.balance} 
+                        showBalance={this.state.showBalance} 
+                        handleBalanceDisplay={this.handleBalanceDisplay}/>
+        <CoinList coinData={this.state.coinData} 
+                  showBalance={this.state.showBalance}
+                  handleRefresh={this.handleRefresh}/>
+      </Div>
+    );
+  }
 }
- /*props are optional */
+
 export default App;

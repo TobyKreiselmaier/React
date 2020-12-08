@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Call Demo</title>
+    <script>
+        async function fetchApiData() {
+            try {
+                var row = [];
+                fetch('https://api.coinpaprika.com/v1/coins')
+                    .then(data => data.json())
+                        .then(coins => {
+                            for (let i = 0; i < coins.length; i++) {
+                                let coin = coins[i];
+                                row.push(`<tr>
+                                            <td>${coin.name}</td>
+                                            <td>${coin.symbol}</td>
+                                          </tr>`);
+                            }
+                            let coinTable = document.querySelector('.root'); 
+                            coinTable.innerHTML = 
+                                `<table>
+                                    <caption>Top oins</caption>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Ticker</th>
+                                    </tr>
+                                    ${row.join('')}
+                                </table>`;
+                        });
+                    } catch (error) {
+                        console.log('fetch error: ' + eror);
+                    }
+                }
+                window.onload = fetchApiData();
+    </script>
+</head>
+<body>
+    <div class='root'></div>
+</body>
+</html>

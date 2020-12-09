@@ -60,7 +60,7 @@ class App extends React.Component {
       if (valueChangeTicker === values.ticker) {
         let randomPercentage = 0.95 + Math.random() * 0.1;
             newValues.price *= randomPercentage;
-      };
+      }
       return newValues;
     });
     this.setState( {coinData: newCoinData} )//will trigger fresh rendering //balance remains untouched
@@ -81,4 +81,5 @@ class App extends React.Component {
   }
 }
 
+ /*props are optional */
 export default App;

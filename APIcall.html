@@ -11,29 +11,37 @@
                 fetch('https://api.coinpaprika.com/v1/coins')
                     .then(data => data.json())
                         .then(coins => {
-                            for (let i = 0; i < coins.length; i++) {
+                            for (let i = 0; i < 20; i++) {
                                 let coin = coins[i];
-                                row.push(`<tr>
+                                row.push(`
+                                        <tr>
+                                            <td>${coin.rank}</td>
                                             <td>${coin.name}</td>
                                             <td>${coin.symbol}</td>
-                                          </tr>`);
-                            }
-                            let coinTable = document.querySelector('.root'); 
-                            coinTable.innerHTML = 
-                                `<table>
-                                    <caption>Top oins</caption>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Ticker</th>
-                                    </tr>
-                                    ${row.join('')}
-                                </table>`;
+                                        </tr>
+                                        `);
+                            };
+                            var coinTable = document.querySelector('.root'); 
+                            coinTable.innerHTML = `
+                                                   <table>
+                                                       <caption>Top 20 Coins</caption>
+                                                       <thead>
+                                                           <th>Rank</th>
+                                                           <th>Name</th>
+                                                           <th>Ticker</th>
+                                                       </thead>
+                                                       <tbody>
+                                                           ${row.join('')}
+                                                       </tbody>
+                                                   </table>
+                                                  `
                         });
-                    } catch (error) {
-                        console.log('fetch error: ' + eror);
-                    }
-                }
-                window.onload = fetchApiData();
+            } 
+            catch (error) {
+                console.error;
+            }
+        }
+        document.onload = fetchApiData();
     </script>
 </head>
 <body>

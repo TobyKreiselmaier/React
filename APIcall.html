@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Call Demo</title>
     <script>
-        async function fetchApiData() {
+        function fetchApiData() {
             try {
                 var row = [];
                 fetch('https://api.coinpaprika.com/v1/coins')
                     .then(data => data.json())
                         .then(coins => {
-                            for (let i = 0; i < 20; i++) {
+                            for (let i = 0; i < coins.length; i++) {
                                 let coin = coins[i];
                                 row.push(`
                                         <tr>
@@ -24,7 +24,7 @@
                             var coinTable = document.querySelector('.root'); 
                             coinTable.innerHTML = `
                                                    <table>
-                                                       <caption>Top 20 Coins</caption>
+                                                       <caption>Top Coins</caption>
                                                        <thead>
                                                            <th>Rank</th>
                                                            <th>Name</th>

@@ -11,7 +11,7 @@
                 fetch('https://api.coinpaprika.com/v1/coins')
                     .then(data => data.json())
                         .then(coins => {
-                            for (let i = 0; i < coins.length; i++) {
+                            for (let i = 0; i < 20; i++) {
                                 let coin = coins[i];
                                 row.push(`
                                         <tr>
@@ -24,7 +24,7 @@
                             var coinTable = document.querySelector('.root'); 
                             coinTable.innerHTML = `
                                                    <table>
-                                                       <caption>Top Coins</caption>
+                                                       <caption>Top 20 Coins</caption>
                                                        <thead>
                                                            <th>Rank</th>
                                                            <th>Name</th>

@@ -3,6 +3,7 @@ import ExchangeHeader from './components/ExchangeHeader/ExchangeHeader';
 import AccountBalance from './components/AccountBalance/AccountBalance';
 import CoinList from './components/CoinList/CoinList';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const Div = styled.div`
     text-align: center;
@@ -10,60 +11,61 @@ const Div = styled.div`
     color: rgb(15, 10, 10);
 `;
 
+const COIN_COUNT = 10;
+const formatPrice = price => parseFloat(Number(price).toFixed(4));
+
 class App extends React.Component {
   state = {
     balance: 10000,
-    showBalance: true, //added bool so condition can be passed on
-    coinData: [
-      {
-        name: 'Bitcoin',
-        ticker: 'BTC',
-        balance: 0.5,
-        price: 18966
-      },
-      {
-        name: 'Ethereum',
-        ticker: 'ETH',
-        balance: 32.0,
-        price: 593
-      },
-      {
-        name: 'Tether',
-        ticker: 'USDT',
-        balance: 0,
-        price: 1.0
-      },
-      {
-        name: 'Ripple',
-        ticker: 'XRP',
-        balance: 1000,
-        price: 0.62
-      },
-      {
-        name: 'Bitcoin Cash',
-        ticker: 'BCH',
-        balance: 0,
-        price: 239
-      }
-    ]
+    showBalance: true,
+    coinData: []
   }
 
-  classProperty = 'value'
+  getTopIds = async () => {
+    const response = await axios.get('https://api.coinpaprika.com/v1/coins');
+    return response.data.slice(0, COIN_COUNT).map(coin => coin.id);
+  }
+
+  getNewCoinData = async (ids) => {
+    let data = [];
+    const response = await axios.get('https://api.coinpaprika.com/v1/tickers');
+    for (let i = 0; i < response.data.length; i++) {
+      for (let j = 0; j < ids.length; j++) {
+        if (ids[j] === response.data[i].id) {
+          data.push({ 
+            key: response.data[i].id,
+            name: response.data[i].name,
+            ticker: response.data[i].symbol,
+            balance: 0,
+            price: formatPrice(response.data[i].quotes.USD.price),
+          });
+        }
+      }
+    }
+    return data;
+  }
+
+  componentDidMount = async () => {
+    const topIds = await this.getTopIds();
+    const newCoinData = await this.getNewCoinData(topIds);
+    this.setState({coinData: newCoinData});
+  }
 
   handleBalanceDisplay = () => {
-    this.setState({showBalance: !this.state.showBalance});//change bool
+    this.setState({showBalance: !this.state.showBalance});
   }
 
-  handleRefresh = (valueChangeTicker) => {
+  handleRefresh = async (valueChangeId) => {
+    const response = await axios.get(`https://api.coinpaprika.com/v1/tickers/${valueChangeId}`);
+    const newPrice = formatPrice(response.data.quotes.USD.price);
     const newCoinData = this.state.coinData.map((values) => {
-      let newValues = {...values};
-      if (valueChangeTicker === values.ticker) {
-        let randomPercentage = 0.95 + Math.random() * 0.1;
-            newValues.price *= randomPercentage;
+      let newValues = { ...values };
+      if (valueChangeId === values.key) {
+        newValues.price = newPrice;
       }
       return newValues;
     });
-    this.setState( {coinData: newCoinData} )//will trigger fresh rendering //balance remains untouched
+    this.setState({coinData: newCoinData});
   }
 
   render() {
@@ -81,5 +83,4 @@ class App extends React.Component {
   }
 }
 
- /*props are optional */
 export default App;

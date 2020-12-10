@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Call Axios</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function fetchApiData() {
+            try {
+                var row = [];
+                axios.get('https://api.coinpaprika.com/v1/coins')//no need for conversion into JSON
+                    .then( response => {//'response' is the common prop used with axios
+                        const coins = response.data;//axios always has data property
+                        for (let i = 0; i < 20; i++) {
+                            let coin = coins[i];
+                            row.push(`
+                                    <tr>
+                                        <td>${coin.rank}</td>
+                                        <td>${coin.name}</td>
+                                        <td>${coin.symbol}</td>
+                                    </tr>
+                                    `);
+                        };
+                        var coinTable = document.querySelector('.root'); 
+                        coinTable.innerHTML = `
+                                                <table>
+                                                    <caption>Top 20 Coins</caption>
+                                                    <thead>
+                                                        <th>Rank</th>
+                                                        <th>Name</th>
+                                                        <th>Ticker</th>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${row.join('')}
+                                                    </tbody>
+                                                </table>
+                                                `
+                    });
+            } 
+            catch (error) {
+                console.error;
+            }
+        }
+        document.onload = fetchApiData();
+    </script>
+</head>
+<body>
+    <div class='root'></div>
+</body>
+</html>

@@ -1,9 +1,11 @@
-import React from 'react'
-import ExchangeHeader from './components/ExchangeHeader/ExchangeHeader';
+import React, {useState, useEffect} from 'react'
+import Header from './components/Header/Header';
 import AccountBalance from './components/AccountBalance/AccountBalance';
 import CoinList from './components/CoinList/CoinList';
 import styled from 'styled-components';
 import axios from 'axios';
+import 'bootswatch/dist/darkly/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/js/all';
 
 const Div = styled.div`
     text-align: center;
@@ -11,22 +13,23 @@ const Div = styled.div`
     color: rgb(15, 10, 10);
 `;
 
-const COIN_COUNT = 10;
-const formatPrice = price => parseFloat(Number(price).toFixed(4));
+var formatter = Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD'
+});
 
-class App extends React.Component {
-  state = {
-    balance: 10000,
-    showBalance: true,
-    coinData: []
-  }
+function App () {
+  const [coinCount] = useState(20);
+  const [balance, setBalance] = useState(0);//use State Hook
+  const [showBalance, setShowBalance] = useState(true);
+  const [coinData, setCoinData] = useState([]);
 
-  getTopIds = async () => {
+  const getTopIds = async () => {
     const response = await axios.get('https://api.coinpaprika.com/v1/coins');
-    return response.data.slice(0, COIN_COUNT).map(coin => coin.id);
+    return response.data.slice(0, coinCount).map(coin => coin.id);
   }
 
-  getNewCoinData = async (ids) => {
+  const getNewCoinData = async (ids) => {
     let data = [];
     const response = await axios.get('https://api.coinpaprika.com/v1/tickers');
     for (let i = 0; i < response.data.length; i++) {
@@ -37,7 +40,7 @@ class App extends React.Component {
             name: response.data[i].name,
             ticker: response.data[i].symbol,
             balance: 0,
-            price: formatPrice(response.data[i].quotes.USD.price),
+            price: formatter.format(response.data[i].quotes.USD.price)
           });
         }
       }
@@ -45,42 +48,143 @@ class App extends React.Component {
     return data;
   }
 
-  componentDidMount = async () => {
-    const topIds = await this.getTopIds();
-    const newCoinData = await this.getNewCoinData(topIds);
-    this.setState({coinData: newCoinData});
+  const componentDidMount = async () => {
+    const topIds = await getTopIds();
+    const newCoinData = await getNewCoinData(topIds);
+    setCoinData(newCoinData);
+    var amount = (prompt("Please enter the size of your testportfolio in USD:", 1000000));
+    if (amount === null) {
+      //check for 'cancel' button
+      return;
+    } else {
+      amount = parseFloat(amount);
+    };
+    if (isNaN(amount)) {
+      //check if number was entered
+      alert("Please enter a number!");
+      componentDidMount();
+    } else if (amount <= 0) {
+      //check if negative number was entered
+      alert("Please enter a positive number!");
+      componentDidMount();
+    } else{
+      setBalance(amount);
+    }
   }
 
-  handleBalanceDisplay = () => {
-    this.setState({showBalance: !this.state.showBalance});
+  useEffect(() => {//Effect Hook - can not be async!
+    if (coinData.length === 0) {//componentDidMount sitation
+      componentDidMount();
+    }
+  });
+
+  const handleAirDrop = () => {//doesn't fire
+    setBalance(old => old + 1200);
   }
 
-  handleRefresh = async (valueChangeId) => {
-    const response = await axios.get(`https://api.coinpaprika.com/v1/tickers/${valueChangeId}`);
-    const newPrice = formatPrice(response.data.quotes.USD.price);
-    const newCoinData = this.state.coinData.map((values) => {
+  const handleTransaction = (isBuy, valueChangeId) => {
+    var balanceChange;
+    var newCoinData = [];
+    if(showBalance){//only allow operation when balances are shown.
+      if(isBuy) {//buy operation
+        balanceChange = prompt(`How many ` + valueChangeId + ` would you like to buy?`, 1);
+        if (balanceChange === null) {
+          return;
+        } else if (balanceChange <= 0) {
+          //throw if negative number
+          alert("Please enter a positive number!");
+          handleTransaction(true, valueChangeId);
+        } else if (isNaN(balanceChange)) {
+          //throw if no number
+          alert("Please enter a number!");
+          handleTransaction(true, valueChangeId);
+        } else{
+          //handle buy input
+          balanceChange = parseFloat(balanceChange);
+          newCoinData = coinData.map( function(values) {
+            let newValues = {...values};
+            if (valueChangeId === values.key) {
+              //make sure it's the right coin
+              if(newValues.balance + balanceChange >= 0) {
+                //make sure no negative balance possible on coin
+                if(balance - balanceChange * parseFloat((newValues.price).replace(/[$,]/g,'')) >= 0) {
+                  //make sure no negative account balance possible
+                  newValues.balance += balanceChange;
+                  setBalance(old => old - balanceChange * parseFloat((newValues.price).replace(/[$,]/g,'')))
+                }
+              }
+            }
+            return newValues;
+          });
+        }
+      } else if (!isBuy) {//sell operation
+        balanceChange = prompt(`How many ` + valueChangeId + ` would you like to sell?`, 1);
+        if (balanceChange === null) {
+          //throw if 'cancel' button
+          return;
+        } else if (balanceChange <= 0) {
+          //throw if negative number
+          alert("Please enter a positive number!");
+          handleTransaction(false, valueChangeId);
+        } else if (isNaN(balanceChange)) {
+          //throw if no number
+          alert("Please enter a number!");
+          handleTransaction(false, valueChangeId);
+        } else {
+          //handle sell input
+          balanceChange = parseFloat(balanceChange);
+          newCoinData = coinData.map( function(values) {
+            let newValues = {...values};
+            if (valueChangeId === values.key) {
+              //make sure it's the right coin
+              if(newValues.balance - balanceChange >= 0) {
+                //make sure no negative balance possible on coin
+                newValues.balance -= balanceChange;
+                setBalance(old => old + balanceChange * parseFloat((newValues.price).replace(/[$,]/g,'')))
+              } else {
+                alert ('You can not sell what you do not own!');
+              }
+            }
+            return newValues;
+          });
+        }
+      }
+      setCoinData(newCoinData);
+    };
+  }
+
+  const handleBalanceDisplay = () => {
+    setShowBalance(old => !old);
+  }
+
+  const handleRefresh = async (tickerId) => {
+    const response = await axios.get(`https://api.coinpaprika.com/v1/tickers/${tickerId}`);
+    const newPrice = formatter.format(response.data.quotes.USD.price);
+    const newCoinData = coinData.map((values) => {
       let newValues = { ...values };
-      if (valueChangeId === values.key) {
+      if (tickerId === values.key) {
         newValues.price = newPrice;
       }
       return newValues;
     });
-    this.setState({coinData: newCoinData});
+    setCoinData(newCoinData);
   }
 
-  render() {
-    return (
-      <Div className="App">
-        <ExchangeHeader/>
-        <AccountBalance amount={this.state.balance} 
-                        showBalance={this.state.showBalance} 
-                        handleBalanceDisplay={this.handleBalanceDisplay}/>
-        <CoinList coinData={this.state.coinData} 
-                  showBalance={this.state.showBalance}
-                  handleRefresh={this.handleRefresh}/>
-      </Div>
-    );
-  }
+  return (
+    <Div className="App">
+      <Header/>
+      <AccountBalance 
+        amount={balance} 
+        showBalance={showBalance} 
+        handleAirDrop={handleAirDrop} 
+        handleBalanceDisplay={handleBalanceDisplay}/>
+      <CoinList 
+        coinData={coinData} 
+        showBalance={showBalance} 
+        handleTransaction={handleTransaction} 
+        handleRefresh={handleRefresh}/>
+    </Div>
+  );
 }
 
 export default App;

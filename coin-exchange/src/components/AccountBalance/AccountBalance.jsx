@@ -1,38 +1,56 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import propTypes from 'prop-types';
 
 const Section = styled.section`
     font-size: 2rem;
-    text-align: left;
-    padding: 1.5rem 5rem 1.5rem 5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 3rem;
 `;
 
 const Button = styled.button`
-    font-size: 1.6rem;
-    margin: 1.5rem 0 1.5rem 5rem;
-    background-color: #282c34;
-    color: #fff;
+    margin: 0 8px;
     border: 1px solid #fff;
     border-radius: 5px;
 `;
 
-export default class AccountBalance extends Component {
-    render() {
-        const buttonText = this.props.showBalance ? 
-                           'Hide Balance' : 'Show Balance';
-        let content = this.props.showBalance ? 
-                      <>Account Balance: ${this.props.amount}</> : null;
+const Balance = styled.div`
+    min-width: 250px;
+    margin 0.5rem 0 0 2.5rem;
+    font-size: 1.5rem;
+    vertical-align: middle;
+    text-align: left;
+`;
 
-        return (
+var formatter = Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+});
+
+export default function AccountBalance (props) {
+    let content = '\u00a0';//placeholder so page doesn't jump
+    if (props.showBalance) {
+        content = <>Account Balance: {formatter.format(props.amount)}</>
+    }
+    const buttonClass = 'btn ' + (props.showBalance ? 'btn-warning' : 'btn-info')
+    return (
+        <>
+            <Balance>{content}</Balance>
             <Section>
-                {content}
-                <Button onClick={this.props.handleBalanceDisplay}>
-                    {buttonText}
+                <Button 
+                    onClick={props.handleBalanceDisplay} 
+                    className={buttonClass}>
+                    {props.showBalance ? 'Hide Balances' : 'Show Balances'}
+                </Button>
+                <Button 
+                    onClick={props.handleAirDrop}
+                    className='btn btn-success'>
+                    <i className="fas fa-helicopter"></i>
                 </Button>
             </Section>
-        );
-    }
+        </>
+    );
 }
 
 AccountBalance.propTypes = {

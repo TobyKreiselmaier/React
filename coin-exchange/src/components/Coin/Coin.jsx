@@ -1,50 +1,68 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import propTypes from 'prop-types';
 
 const Td = styled.td`
     border: 1px solid rgb(15, 10, 10);
-    width: 25vh;
+    width: 12vw;
+    height: 5vh;
+`;
+
+const TdControls = styled(Td)`
+    width: 20vw;
+`;
+
+const TdName = styled(Td)`
+    width: 24vw;
 `;
 
 const Button = styled.button`
     font-size: 1.0rem;
-    margin: 0.5rem 0 0.5rem 0;
-    background-color: #282c34;
-    color: #fff;
+    margin: 0.1rem 0.2rem 0.1rem 0.2rem;
     border: 1px solid #fff;
     border-radius: 5px;
 `;
 
-export default class Coin extends Component {
-    handleClick = (event) => {
-      event.preventDefault();
-      this.props.handleRefresh(this.props.tickerId);
-    }
+export default function Coin (props) {
+  const handleRefresh = (event) => {
+    event.preventDefault();
+    props.handleRefresh(props.tickerId);
+  }
 
-    render() {
-        const coinBalance = this.props.showBalance ?
-                            <Td>{this.props.balance} {this.props.ticker}</Td> : null;
+  const handleBuy = (event) => {
+    event.preventDefault();
+    props.handleTransaction(true, props.tickerId);
+  }
 
-        return (
-            <tr>
-              <Td>{this.props.name}</Td>
-              <Td>{this.props.ticker}</Td>
-              <Td>${this.props.price}</Td>
-              {coinBalance}
-              <Td>
-                <form action='#' method='POST'>
-                  <Button onClick={this.handleClick}>Refresh
-                  </Button>
-                </form>
-              </Td>
-            </tr>
-        );
-      }
+  const handleSell = (event) => {
+    event.preventDefault();
+    props.handleTransaction(false, props.tickerId);
+  }
+  
+  return (
+    <tr>
+      <TdName>{props.name}</TdName>
+      <Td>{props.ticker}</Td>
+      <Td>{props.price}</Td>
+      <Td>{props.showBalance ? props.balance:'-'}</Td>
+      <TdControls>
+        <form action='#' method='POST'>
+        <Button className='btn btn-warning' onClick={handleRefresh}>
+            Refresh Price
+        </Button>
+        <Button className='btn btn-success' onClick={handleBuy}>
+            Buy
+        </Button>
+        <Button className='btn btn-danger' onClick={handleSell}>
+            Sell
+        </Button>
+        </form>
+      </TdControls>
+    </tr>
+  );
 }
 
 Coin.propTypes = {
   name: propTypes.string.isRequired,
   ticker: propTypes.string.isRequired,
-  price: propTypes.number.isRequired
 }
